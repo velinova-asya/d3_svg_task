@@ -1,0 +1,112 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+
+
+    <style>
+    
+      path {stroke: #fff;}
+      
+      path:first-child {fill: yellow !important;}
+
+      circle {fill: #000; pointer-events: none; }
+
+
+      .q0-9 { fill: rgb(197,27,125); }
+      .q1-9 { fill: rgb(222,119,174); }
+      .q2-9 { fill: rgb(241,182,218); }
+      .q3-9 { fill: rgb(253,224,239); }
+      .q4-9 { fill: rgb(247,247,247); }
+      .q5-9 { fill: rgb(230,245,208); }
+      .q6-9 { fill: rgb(184,225,134); }
+      .q7-9 { fill: rgb(127,188,65); }
+      .q8-9 { fill: rgb(77,146,33); }
+    
+    </style>
+
+  </head>
+
+
+  <body cz-shortcut-listen="true">
+    
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    
+
+    <script>
+
+    var width = 960,
+        height = 500;
+
+    var vertices = d3.range(100).map(function(d) {
+      return [Math.random() * width, Math.random() * height];
+    });
+
+
+    
+    var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .on("mousemove", redraw)
+        .on("click", add);
+
+
+
+    svg.selectAll("path")
+      .data(d3.geom.voronoi(vertices))
+      .enter().append("path")
+      .attr("class", function(d, i) { return i ? "q" + (i % 9) + "-9" : null; })
+      .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
+
+
+    svg.selectAll("circle")
+      .data(vertices.slice(1))
+      .enter().append("circle")
+      .attr("transform", function(d) { return "translate(" + d + ")"; })
+      .attr("r", 1.5);
+
+
+
+    function add() {
+
+      vertices.push(d3.mouse(this));
+
+      svg.selectAll("path")
+        .data(d3.geom.voronoi(vertices))
+        .enter().append("path")
+          .attr("class", function(d, i) { return i ? "q" + (i % 9) + "-9" : null; })
+          .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
+
+      svg.selectAll("circle")
+        .data(vertices.slice(1))
+        .enter().append("circle")
+        .attr("transform", function(d) { return "translate(" + d + ")"; })
+        .attr("r", 1.5);
+    }
+
+
+    var path = svg.append("g").selectAll("path");
+    
+
+
+    function redraw() {
+
+      var pointer = d3.mouse(this);
+
+      for (var i = 0; i < vertices.length; i++) {
+        if (vertices[i][0] == pointer[0] && vertices[i][1] == pointer[1]) return;
+      }
+
+      vertices[0] = pointer;
+
+
+      svg.selectAll("path")
+        .data(d3.geom.voronoi(vertices)
+        .map(function(d) { return "M" + d.join("L") + "Z"; }))
+        .filter(function(d) { return this.getAttribute("d") != d; })
+        .attr("d", function(d) { return d; }); 
+    }
+
+    
+    </script>
+</body>
+</html>
